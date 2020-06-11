@@ -4,16 +4,23 @@
 # Thomas Herring 2020
 
 
-dir=$(pwd)
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 dest="/home/therring/.local/bin/"
 
-for i in  * 
+if [ ! -d $dest ]
+then
+	echo "No $dest found, making one"
+	mkdir $dest
+fi
+
+
+for i in  $dir/*
 do
   if [ "$i" != "link.sh" ]
   then
 
     # Command to link or override existing links.
-    ln -sfn "$dir/$i"  "$dest"
-    echo "Linking $dir/$i  to $dest"
+    ln -sfn "$i"  "$dest"
+    echo "Linking $i  to $dest"
   fi
 done
