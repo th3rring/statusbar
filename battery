@@ -1,0 +1,29 @@
+#!/bin/bash
+
+source ~/.local/share/fonts/i_all.sh
+
+
+case $BLOCK_BUTTON in
+	3) notify-send "$i_mdi_battery Battery module" "$i_mdi_battery_70: discharging
+$i_mdi_battery_minus: not charging
+$i_mdi_battery_alert: stagnant charge
+$i_mdi_battery_charging: charging
+$i_mdi_battery: charged
+$i_mdi_battery_alert: battery very low!" ;;
+	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
+esac
+
+
+# Loop through all attached batteries.
+for battery in /sys/class/power_supply/BAT?
+do
+	# Get its remaining capacity and charge status.
+	capacity=$(cat "$battery"/capacity) || break
+	status=$(sed "s/[Dd]ischarging/$i_mdi_battery_70/;s/[Nn]ot charging/$i_mdi_battery_minus/;s/[Cc]harging/$i_mdi_battery_charging/;s/[Uu]nknown/$i_mdi_battery_alert/;s/[Ff]ull/$i_mdi_battery/" "$battery"/status)
+
+	# If it is discharging and 25% or less, we will add a as a warning.
+	 [ "$capacity" -le 25 ] && [ "$status" = "$i_mdi_battery" ] && warn="$i_mdi_battery_alert"
+
+	printf "%s %s%s%% " "$status" "$warn" "$capacity"
+	unset warn
+done | sed 's/ *$//'
